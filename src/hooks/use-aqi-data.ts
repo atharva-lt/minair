@@ -53,7 +53,8 @@ export function useAqiData(city: string) {
   return useQuery<LiveAqiData>({
     queryKey: ["aqi", city],
     queryFn: () => fetchAqiData(city),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
     retry: 2,
   });
 }
