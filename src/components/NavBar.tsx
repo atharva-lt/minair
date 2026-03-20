@@ -26,6 +26,10 @@ const NavBar = () => {
           <LayoutDashboard className="w-3.5 h-3.5" />
           <span>Dashboard</span>
         </NavLink>
+        <NavLink to="/simulation" className={linkClass}>
+          <FlaskConical className="w-3.5 h-3.5" />
+          <span>Simulation</span>
+        </NavLink>
       </div>
     </nav>
   );
