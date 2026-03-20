@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NavBar from "@/components/NavBar";
 import Home from "./pages/Home";
+import Simulation from "./pages/Simulation";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
