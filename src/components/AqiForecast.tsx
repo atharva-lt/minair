@@ -1,12 +1,15 @@
-import { getAqiLevel, MOCK_CITY } from "@/lib/aqi-data";
+import { getAqiLevel } from "@/lib/aqi-data";
 
-const AqiForecast = () => {
-  const forecast = MOCK_CITY.forecast;
-  const maxAqi = Math.max(...forecast.map((f) => f.aqi));
+interface AqiForecastProps {
+  forecast: { hour: string; aqi: number }[];
+}
+
+const AqiForecast = ({ forecast }: AqiForecastProps) => {
+  const maxAqi = Math.max(...forecast.map((f) => f.aqi), 1);
 
   return (
     <div className="bg-card rounded-xl shadow-card border border-border/50 p-5">
-      <h2 className="text-base font-semibold text-foreground mb-4">24-Hour Forecast</h2>
+      <h2 className="text-base font-semibold text-foreground mb-4">Forecast</h2>
       <div className="flex items-end gap-2 h-32">
         {forecast.map((item, i) => {
           const level = getAqiLevel(item.aqi);
