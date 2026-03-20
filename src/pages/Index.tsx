@@ -1,11 +1,11 @@
 import { useState } from "react";
-import AqiHeader from "@/components/AqiHeader";
-import MainAqiCard from "@/components/MainAqiCard";
-import PollutantCard from "@/components/PollutantCard";
-import AqiForecast from "@/components/AqiForecast";
-import AqiScaleLegend from "@/components/AqiScaleLegend";
-import NearbyStations from "@/components/NearbyStations";
-import HealthRecommendations from "@/components/HealthRecommendations";
+import StickyTopBar from "@/components/StickyTopBar";
+import AqiTrendChart from "@/components/AqiTrendChart";
+import PollutantTrendChart from "@/components/PollutantTrendChart";
+import AqiBreakdownCard from "@/components/AqiBreakdownCard";
+import DynamicHealthRecs from "@/components/DynamicHealthRecs";
+import WeatherDetailsCard from "@/components/WeatherDetailsCard";
+import PollutantTable from "@/components/PollutantTable";
 import { useAqiData } from "@/hooks/use-aqi-data";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -19,65 +19,67 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AqiHeader onSearch={handleSearch} />
+      <StickyTopBar
+        cityName={data?.name || city}
+        aqi={data?.aqi ?? null}
+        onSearch={handleSearch}
+      />
 
-      <main className="container py-6 space-y-6">
+      <main className="container py-5 space-y-5">
         {error && (
-          <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-            Failed to load air quality data: {error.message}. Showing may be stale or unavailable.
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+            Failed to load data: {error.message}
           </div>
         )}
 
-        {/* Main AQI Display */}
+        {/* Main Grid: Left charts + Right sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Left — 2 cols */}
+          <div className="lg:col-span-2 space-y-5">
+            {isLoading ? (
+              <>
+                <Skeleton className="h-64 rounded-xl" />
+                <Skeleton className="h-64 rounded-xl" />
+              </>
+            ) : data ? (
+              <>
+                <AqiTrendChart forecast={data.forecast} />
+                <PollutantTrendChart forecast={data.forecast} pollutants={data.pollutants} />
+              </>
+            ) : null}
+          </div>
+
+          {/* Right — 1 col */}
+          <div className="space-y-5">
+            {isLoading ? (
+              <>
+                <Skeleton className="h-48 rounded-xl" />
+                <Skeleton className="h-56 rounded-xl" />
+                <Skeleton className="h-48 rounded-xl" />
+              </>
+            ) : data ? (
+              <>
+                <AqiBreakdownCard aqi={data.aqi} />
+                <DynamicHealthRecs aqi={data.aqi} />
+                <WeatherDetailsCard
+                  temperature={data.temperature}
+                  humidity={data.humidity}
+                  wind={data.wind}
+                />
+              </>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Pollutant Table — full width */}
         {isLoading ? (
-          <Skeleton className="h-64 w-full rounded-2xl" />
+          <Skeleton className="h-48 rounded-xl" />
         ) : data ? (
-          <MainAqiCard data={data} />
+          <PollutantTable pollutants={data.pollutants} />
         ) : null}
 
-        {/* Pollutants Grid */}
-        <section>
-          <h2 className="text-base font-semibold text-foreground mb-3">Pollutant Breakdown</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {isLoading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-28 rounded-xl" />
-                ))
-              : data?.pollutants.map((p, i) => (
-                  <PollutantCard key={p.name} pollutant={p} index={i} />
-                ))}
-          </div>
-        </section>
-
-        {/* Forecast + Scale */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            {isLoading ? (
-              <Skeleton className="h-48 rounded-xl" />
-            ) : data && data.forecast.length > 0 ? (
-              <AqiForecast forecast={data.forecast} />
-            ) : (
-              <div className="bg-card rounded-xl shadow-card border border-border/50 p-5">
-                <h2 className="text-base font-semibold text-foreground mb-4">Forecast</h2>
-                <p className="text-sm text-muted-foreground">No forecast data available for this location.</p>
-              </div>
-            )}
-          </div>
-          <AqiScaleLegend />
-        </div>
-
-        {/* Nearby + Health */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {isLoading ? (
-            <Skeleton className="h-64 rounded-xl" />
-          ) : (
-            <NearbyStations stations={data?.nearby || []} />
-          )}
-          <HealthRecommendations />
-        </div>
-
         {/* Footer */}
-        <footer className="text-center py-6 text-xs text-muted-foreground">
+        <footer className="text-center py-4 text-xs text-muted-foreground">
           <p>Powered by WAQI.info — AirScope © 2026</p>
         </footer>
       </main>
