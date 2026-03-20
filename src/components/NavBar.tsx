@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Home, LayoutDashboard } from "lucide-react";
+import { Home, LayoutDashboard, FlaskConical } from "lucide-react";
 
 const NavBar = () => {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -25,6 +25,10 @@ const NavBar = () => {
         <NavLink to="/dashboard" className={linkClass}>
           <LayoutDashboard className="w-3.5 h-3.5" />
           <span>Dashboard</span>
+        </NavLink>
+        <NavLink to="/simulation" className={linkClass}>
+          <FlaskConical className="w-3.5 h-3.5" />
+          <span>Simulation</span>
         </NavLink>
       </div>
     </nav>
