@@ -27,15 +27,26 @@ async function fetchAqiData(city: string): Promise<LiveAqiData> {
   });
 
   if (error) throw new Error(error.message);
-  if (data.error) throw new Error(data.error);
+  if (!data || data.error) throw new Error(data?.error || "No data returned");
 
   // Attach level to each pollutant
-  const pollutants = data.pollutants.map((p: any) => ({
+  const pollutants = (data.pollutants || []).map((p: any) => ({
     ...p,
     level: getPollutantLevel(p.name, p.value),
   }));
 
-  return { ...data, pollutants };
+  return {
+    name: data.name || city,
+    country: data.country || "",
+    aqi: data.aqi ?? 0,
+    temperature: data.temperature ?? null,
+    humidity: data.humidity ?? null,
+    wind: data.wind ?? null,
+    lastUpdated: data.lastUpdated || "unknown",
+    pollutants,
+    forecast: data.forecast || [],
+    nearby: data.nearby || [],
+  };
 }
 
 export function useAqiData(city: string) {
