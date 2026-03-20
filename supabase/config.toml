@@ -1,1 +1,4 @@
 project_id = "gucxjfplyxqxtdtfsvxh"
+
+[functions.fetch-aqi]
+verify_jwt = false
