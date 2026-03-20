@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Home, LayoutDashboard } from "lucide-react";
+import { Home, LayoutDashboard, FlaskConical } from "lucide-react";
 
 const NavBar = () => {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
