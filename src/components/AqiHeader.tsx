@@ -1,8 +1,17 @@
 import { Search, MapPin, Bell } from "lucide-react";
 import { useState } from "react";
 
-const AqiHeader = () => {
+interface AqiHeaderProps {
+  onSearch: (query: string) => void;
+}
+
+const AqiHeader = ({ onSearch }: AqiHeaderProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(searchQuery);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
@@ -12,13 +21,11 @@ const AqiHeader = () => {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm font-mono">AQ</span>
             </div>
-            <span className="text-lg font-bold tracking-tight text-foreground">
-              AirScope
-            </span>
+            <span className="text-lg font-bold tracking-tight text-foreground">AirScope</span>
           </div>
         </div>
 
-        <div className="flex-1 max-w-md">
+        <form onSubmit={handleSubmit} className="flex-1 max-w-md">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -29,10 +36,18 @@ const AqiHeader = () => {
               className="w-full pl-10 pr-4 py-2 rounded-lg bg-secondary text-secondary-foreground placeholder:text-muted-foreground text-sm border-none outline-none focus:ring-2 focus:ring-ring transition-shadow"
             />
           </div>
-        </div>
+        </form>
 
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-muted transition-colors">
+          <button
+            onClick={() => {
+              navigator.geolocation?.getCurrentPosition(
+                (pos) => onSearch(`geo:${pos.coords.latitude};${pos.coords.longitude}`),
+                () => {}
+              );
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-muted transition-colors"
+          >
             <MapPin className="w-4 h-4" />
             <span className="hidden sm:inline">My Location</span>
           </button>
