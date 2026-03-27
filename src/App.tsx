@@ -32,8 +32,9 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/simulation" element={<Simulation />} />
-                  <Route path="*" element={<NotFound />} />
+                   <Route path="/simulation" element={<Simulation />} />
+                   <Route path="/hypro" element={<Hypro />} />
+                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
             </div>
