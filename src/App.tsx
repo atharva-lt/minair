@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Simulation from "./pages/Simulation";
+import Hypro from "./pages/Hypro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
