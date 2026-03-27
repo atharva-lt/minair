@@ -2,3 +2,6 @@ project_id = "gucxjfplyxqxtdtfsvxh"
 
 [functions.fetch-aqi]
 verify_jwt = false
+
+[functions.fetch-india-aqi]
+verify_jwt = false
