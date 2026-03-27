@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Simulation from "./pages/Simulation";
+import Hypro from "./pages/Hypro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,8 +32,9 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/simulation" element={<Simulation />} />
-                  <Route path="*" element={<NotFound />} />
+                   <Route path="/simulation" element={<Simulation />} />
+                   <Route path="/hypro" element={<Hypro />} />
+                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
             </div>
