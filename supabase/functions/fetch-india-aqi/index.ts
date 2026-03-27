@@ -4,6 +4,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const INDIAN_CITIES = [
+  "delhi", "mumbai", "bangalore", "chennai", "kolkata",
+  "hyderabad", "pune", "ahmedabad", "jaipur", "lucknow",
+  "kanpur", "nagpur", "patna", "indore", "bhopal",
+  "visakhapatnam", "vadodara", "ludhiana", "agra", "varanasi",
+  "chandigarh", "guwahati", "thiruvananthapuram", "coimbatore", "kochi",
+  "surat", "rajkot", "jodhpur", "amritsar", "ranchi",
+  "dehradun", "gwalior", "noida", "gurgaon", "mysore",
+];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -18,27 +28,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    // India bounding box: lat 6-37, lon 68-98
-    const url = `https://api.waqi.info/v2/map/bounds?latlng=6,68,37,98&networks=all&token=${token}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    // Fetch all cities in parallel
+    const results = await Promise.allSettled(
+      INDIAN_CITIES.map(async (city) => {
+        const res = await fetch(`https://api.waqi.info/feed/${city}/?token=${token}`);
+        const data = await res.json();
+        if (data.status === "ok" && data.data?.city?.geo) {
+          const d = data.data;
+          return {
+            name: d.city.name?.split(",")[0] || city,
+            lat: d.city.geo[0],
+            lon: d.city.geo[1],
+            aqi: typeof d.aqi === "number" ? d.aqi : parseInt(d.aqi) || 0,
+          };
+        }
+        return null;
+      })
+    );
 
-    if (data.status !== "ok") {
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch India AQI data", details: data }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Map to simplified station objects
-    const stations = (data.data || [])
-      .filter((s: any) => typeof s.aqi === "number" && s.aqi > 0)
-      .map((s: any) => ({
-        name: s.station?.name || "Unknown",
-        lat: s.lat,
-        lon: s.lon,
-        aqi: s.aqi,
-      }));
+    const stations = results
+      .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && r.value !== null)
+      .map((r) => r.value);
 
     return new Response(JSON.stringify({ stations }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
