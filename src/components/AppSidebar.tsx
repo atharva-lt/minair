@@ -19,6 +19,9 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Simulation", url: "/simulation", icon: FlaskConical },
   { title: "HYPRO", url: "/hypro", icon: MapPin },
+  { title: "Insights", url: "/insights", icon: BarChart3 },
+  { title: "Analysis", url: "/analysis", icon: Microscope },
+  { title: "Alerts", url: "/alerts", icon: Bell },
 ];
 
 export function AppSidebar() {
