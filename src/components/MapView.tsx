@@ -1,18 +1,22 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getAqiColor, getAqiLabel } from "@/lib/zone-data";
 import { AqiMapLegend } from "./AqiMapLegend";
-import { useIndiaAqi } from "@/hooks/use-india-aqi";
+import { useIndiaAqi, type IndiaStation } from "@/hooks/use-india-aqi";
 import { Loader2 } from "lucide-react";
 
-export function MapView() {
+interface MapViewProps {
+  onMapReady?: (map: L.Map) => void;
+  onStationsLoaded?: (stations: IndiaStation[]) => void;
+}
+
+export function MapView({ onMapReady, onStationsLoaded }: MapViewProps = {}) {
   const { data: stations, isLoading, error } = useIndiaAqi();
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const markersRef = useRef<L.CircleMarker[]>([]);
 
-  // Initialize map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -23,17 +27,17 @@ export function MapView() {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(mapRef.current);
 
+    onMapReady?.(mapRef.current);
+
     return () => {
       mapRef.current?.remove();
       mapRef.current = null;
     };
   }, []);
 
-  // Update markers when data changes
   useEffect(() => {
     if (!mapRef.current || !stations) return;
 
-    // Clear old markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
@@ -56,6 +60,8 @@ export function MapView() {
 
       markersRef.current.push(marker);
     });
+
+    onStationsLoaded?.(stations);
   }, [stations]);
 
   return (
