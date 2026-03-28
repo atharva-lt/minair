@@ -10,6 +10,9 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Simulation from "./pages/Simulation";
 import Hypro from "./pages/Hypro";
+import Insights from "./pages/Insights";
+import Analysis from "./pages/Analysis";
+import Alerts from "./pages/Alerts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
