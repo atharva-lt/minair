@@ -1,4 +1,4 @@
-import { Home, LayoutDashboard, FlaskConical, MapPin, Sun, Moon } from "lucide-react";
+import { Home, LayoutDashboard, FlaskConical, MapPin, BarChart3, Bell, Microscope, Sun, Moon } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useTheme } from "next-themes";
@@ -19,6 +19,9 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Simulation", url: "/simulation", icon: FlaskConical },
   { title: "HYPRO", url: "/hypro", icon: MapPin },
+  { title: "Insights", url: "/insights", icon: BarChart3 },
+  { title: "Analysis", url: "/analysis", icon: Microscope },
+  { title: "Alerts", url: "/alerts", icon: Bell },
 ];
 
 export function AppSidebar() {

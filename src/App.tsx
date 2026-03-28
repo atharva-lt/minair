@@ -10,6 +10,9 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Simulation from "./pages/Simulation";
 import Hypro from "./pages/Hypro";
+import Insights from "./pages/Insights";
+import Analysis from "./pages/Analysis";
+import Alerts from "./pages/Alerts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +37,9 @@ const App = () => (
                   <Route path="/dashboard" element={<Dashboard />} />
                    <Route path="/simulation" element={<Simulation />} />
                    <Route path="/hypro" element={<Hypro />} />
+                   <Route path="/insights" element={<Insights />} />
+                   <Route path="/analysis" element={<Analysis />} />
+                   <Route path="/alerts" element={<Alerts />} />
                    <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
