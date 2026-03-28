@@ -1,109 +1,68 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { INDIA_ZONES, getAqiColor, getAqiLabel } from "@/lib/zone-data";
+import { getAqiColor, getAqiLabel } from "@/lib/zone-data";
 import { AqiMapLegend } from "./AqiMapLegend";
+import { useIndiaAqi, type IndiaStation } from "@/hooks/use-india-aqi";
+import { Loader2 } from "lucide-react";
 
 interface MapViewProps {
   onMapReady?: (map: L.Map) => void;
+  onStationsLoaded?: (stations: IndiaStation[]) => void;
 }
 
-const GREY_TILE =
-  "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
-const LABELS_TILE =
-  "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png";
-
-export function MapView({ onMapReady }: MapViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export function MapView({ onMapReady, onStationsLoaded }: MapViewProps = {}) {
+  const { data: stations, isLoading, error } = useIndiaAqi();
   const mapRef = useRef<L.Map | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<L.CircleMarker[]>([]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = L.map(containerRef.current, {
-      zoomControl: false,
-    }).setView([22.5, 79.5], 5);
+    mapRef.current = L.map(containerRef.current).setView([22.5, 78.9], 5);
 
-    L.control.zoom({ position: "topright" }).addTo(map);
-
-    // Grey desaturated base
-    L.tileLayer(GREY_TILE, {
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
-        '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-      subdomains: "abcd",
-      maxZoom: 19,
-    }).addTo(map);
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(mapRef.current);
 
-    // Subtle labels on top of zones
-    const labelsPane = map.createPane("labels");
-    labelsPane.style.zIndex = "650";
-    labelsPane.style.pointerEvents = "none";
-    L.tileLayer(LABELS_TILE, {
-      pane: "labels",
-      subdomains: "abcd",
-      maxZoom: 19,
-    }).addTo(map);
-
-    // Render zones
-    INDIA_ZONES.forEach((zone) => {
-      const color = getAqiColor(zone.aqi);
-      const polygon = L.polygon(zone.boundary, {
-        color: "#ffffff",
-        weight: 2,
-        fillColor: color,
-        fillOpacity: 0.45,
-        className: "zone-polygon",
-      }).addTo(map);
-
-      // Hover effect
-      polygon.on("mouseover", () => {
-        polygon.setStyle({ fillOpacity: 0.7, weight: 3 });
-      });
-      polygon.on("mouseout", () => {
-        polygon.setStyle({ fillOpacity: 0.45, weight: 2 });
-      });
-
-      // Popup
-      polygon.bindPopup(
-        `<div style="min-width:180px;font-family:system-ui,sans-serif">
-          <p style="font-weight:700;font-size:15px;margin:0 0 6px;color:#1a1a2e">${zone.name}</p>
-          <p style="margin:0 0 4px">
-            <span style="font-weight:600">AQI:</span>
-            <span style="color:${color};font-weight:700;font-size:18px;margin-left:4px">${zone.aqi}</span>
-            <span style="font-size:12px;color:#666;margin-left:4px">— ${getAqiLabel(zone.aqi)}</span>
-          </p>
-          <p style="margin:0;font-size:12px;color:#555;line-height:1.4">${zone.healthMessage}</p>
-        </div>`,
-        { className: "zone-popup" }
-      );
-
-      // Zone label
-      const center = polygon.getBounds().getCenter();
-      const label = L.divIcon({
-        className: "zone-label",
-        html: `<div style="
-          font-size:11px;font-weight:700;color:#1a1a2e;
-          text-shadow:0 0 4px rgba(255,255,255,0.9),0 0 8px rgba(255,255,255,0.7);
-          white-space:nowrap;pointer-events:none;text-align:center;
-          line-height:1.3;
-        ">
-          ${zone.name.replace(" India", "")}<br/>
-          <span style="font-size:13px;color:${color}">${zone.aqi}</span>
-        </div>`,
-        iconSize: [80, 30],
-        iconAnchor: [40, 15],
-      });
-      L.marker(center, { icon: label, interactive: false }).addTo(map);
-    });
-
-    mapRef.current = map;
-    onMapReady?.(map);
+    onMapReady?.(mapRef.current);
 
     return () => {
-      map.remove();
+      mapRef.current?.remove();
       mapRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !stations) return;
+
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    stations.forEach((station) => {
+      const color = getAqiColor(station.aqi);
+      const marker = L.circleMarker([station.lat, station.lon], {
+        radius: 8,
+        fillColor: color,
+        color: color,
+        fillOpacity: 0.6,
+        weight: 1.5,
+      }).addTo(mapRef.current!);
+
+      marker.bindPopup(
+        `<div style="min-width:160px">
+          <p style="font-weight:bold;font-size:14px;margin:0 0 4px">${station.name}</p>
+          <p style="margin:0"><strong>AQI:</strong> <span style="color:${color};font-weight:bold">${station.aqi} — ${getAqiLabel(station.aqi)}</span></p>
+        </div>`
+      );
+
+      markersRef.current.push(marker);
+    });
+
+    onStationsLoaded?.(stations);
+  }, [stations]);
 
   return (
     <div className="relative w-full h-full min-h-[500px]">
@@ -113,6 +72,16 @@ export function MapView({ onMapReady }: MapViewProps) {
         style={{ minHeight: "500px" }}
       />
       <AqiMapLegend />
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-xl z-[1000]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+      {error && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-destructive/90 text-destructive-foreground px-4 py-2 rounded-lg text-sm z-[1000]">
+          Failed to load AQI data
+        </div>
+      )}
     </div>
   );
 }
