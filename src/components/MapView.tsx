@@ -6,7 +6,14 @@ import { AqiMapLegend } from "./AqiMapLegend";
 import { useIndiaAqi } from "@/hooks/use-india-aqi";
 import { Loader2 } from "lucide-react";
 
-export function MapView() {
+export interface MapViewHandle {
+  flyTo: (lat: number, lon: number) => void;
+}
+
+export function MapView({ onStationsReady, mapRef: externalMapRef }: {
+  onStationsReady?: (stations: IndiaStation[]) => void;
+  mapRef?: React.MutableRefObject<L.Map | null>;
+} = {}) {
   const { data: stations, isLoading, error } = useIndiaAqi();
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
