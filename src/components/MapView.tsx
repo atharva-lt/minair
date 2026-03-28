@@ -3,7 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getAqiColor, getAqiLabel } from "@/lib/zone-data";
 import { AqiMapLegend } from "./AqiMapLegend";
-import { useIndiaAqi } from "@/hooks/use-india-aqi";
+import { useIndiaAqi, type IndiaStation } from "@/hooks/use-india-aqi";
 import { Loader2 } from "lucide-react";
 
 export interface MapViewHandle {
