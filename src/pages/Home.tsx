@@ -13,13 +13,9 @@ const Home = () => {
   const [city, setCity] = useState("delhi");
   const { data, isLoading, error } = useAqiData(city);
 
-  const handleSearch = (query: string) => {
-    if (query.trim()) setCity(query.trim());
-  };
-
   return (
     <div className="p-5 space-y-6">
-      <AqiHeader onSearch={handleSearch} />
+      <AqiHeader city={city} onCityChange={setCity} />
       {error && (
         <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
           Failed to load air quality data: {error.message}.
