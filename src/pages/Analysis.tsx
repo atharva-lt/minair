@@ -24,10 +24,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-const PRESET_CITIES = [
-  "Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata",
-  "Hyderabad", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
-];
+import { SUPPORTED_CITY_LABELS } from "@/lib/cities";
+
+const PRESET_CITIES = SUPPORTED_CITY_LABELS;
 
 const CHART_COLORS = [
   "hsl(210, 70%, 45%)",

@@ -1,46 +1,27 @@
 import { useState } from "react";
-import { Search, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import AqiTrendChart from "@/components/AqiTrendChart";
 import PollutantTrendChart from "@/components/PollutantTrendChart";
 import AqiBreakdownCard from "@/components/AqiBreakdownCard";
 import DynamicHealthRecs from "@/components/DynamicHealthRecs";
 import WeatherDetailsCard from "@/components/WeatherDetailsCard";
 import PollutantTable from "@/components/PollutantTable";
+import { CityPicker } from "@/components/CityPicker";
 import { useAqiData } from "@/hooks/use-aqi-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAqiLevel } from "@/lib/aqi-data";
 
 const Dashboard = () => {
   const [city, setCity] = useState("delhi");
-  const [searchQuery, setSearchQuery] = useState("");
   const { data, isLoading, error } = useAqiData(city);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setCity(searchQuery.trim());
-      setSearchQuery("");
-    }
-  };
 
   const level = data ? getAqiLevel(data.aqi) : null;
 
   return (
     <div className="p-5 space-y-5">
-      {/* Inline search + city badge */}
-      <div className="flex flex-wrap items-center gap-3">
-        <form onSubmit={handleSearch} className="flex-1 max-w-sm">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search city..."
-              className="w-full pl-8 pr-3 py-1.5 rounded-md bg-secondary text-secondary-foreground placeholder:text-muted-foreground text-sm border-none outline-none focus:ring-2 focus:ring-ring transition-shadow"
-            />
-          </div>
-        </form>
+      {/* City picker + city badge */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <CityPicker value={city} onChange={setCity} />
         {data && level && (
           <div className="flex items-center gap-2">
             <MapPin className="w-3.5 h-3.5 text-muted-foreground" />

@@ -4,15 +4,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const INDIAN_CITIES = [
-  "delhi", "mumbai", "bangalore", "chennai", "kolkata",
-  "hyderabad", "pune", "ahmedabad", "jaipur", "lucknow",
-  "kanpur", "nagpur", "patna", "indore", "bhopal",
-  "visakhapatnam", "vadodara", "ludhiana", "agra", "varanasi",
-  "chandigarh", "guwahati", "thiruvananthapuram", "coimbatore", "kochi",
-  "surat", "rajkot", "jodhpur", "amritsar", "ranchi",
-  "dehradun", "gwalior", "noida", "gurgaon", "mysore",
-];
+// Restricted to 4 cities — kept in sync with src/lib/cities.ts
+const INDIAN_CITIES = ["delhi", "mumbai", "hyderabad", "chennai"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -28,7 +21,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch all cities in parallel
     const results = await Promise.allSettled(
       INDIAN_CITIES.map(async (city) => {
         const res = await fetch(`https://api.waqi.info/feed/${city}/?token=${token}`);

@@ -13,16 +13,13 @@ const Index = () => {
   const [city, setCity] = useState("delhi");
   const { data, isLoading, error } = useAqiData(city);
 
-  const handleSearch = (query: string) => {
-    if (query.trim()) setCity(query.trim());
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <StickyTopBar
         cityName={data?.name || city}
         aqi={data?.aqi ?? null}
-        onSearch={handleSearch}
+        city={city}
+        onCityChange={setCity}
       />
 
       <main className="container py-5 space-y-5">
