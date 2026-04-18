@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface IndiaStation {
+  uid?: number;
   name: string;
+  station?: string;
   lat: number;
   lon: number;
   aqi: number;
