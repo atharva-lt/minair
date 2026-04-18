@@ -4,8 +4,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Restricted to 4 cities — kept in sync with src/lib/cities.ts
-const INDIAN_CITIES = ["delhi", "mumbai", "hyderabad", "chennai"];
+// India bounding box (lat1,lng1,lat2,lng2) — covers mainland + islands.
+// WAQI map-bounds endpoint returns ALL stations inside the box.
+const INDIA_BOUNDS = "6.0,67.0,37.5,98.0";
+
+interface Station {
+  uid: number;
+  name: string;
+  lat: number;
+  lon: number;
+  aqi: number;
+  station?: string;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -21,33 +31,40 @@ Deno.serve(async (req) => {
       );
     }
 
-    const results = await Promise.allSettled(
-      INDIAN_CITIES.map(async (city) => {
-        const res = await fetch(`https://api.waqi.info/feed/${city}/?token=${token}`);
-        const data = await res.json();
-        if (data.status === "ok" && data.data?.city?.geo) {
-          const d = data.data;
-          return {
-            name: d.city.name?.split(",")[0] || city,
-            lat: d.city.geo[0],
-            lon: d.city.geo[1],
-            aqi: typeof d.aqi === "number" ? d.aqi : parseInt(d.aqi) || 0,
-          };
-        }
-        return null;
+    // Fetch ALL stations within India bounds in a single request
+    const url = `https://api.waqi.info/map/bounds/?latlng=${INDIA_BOUNDS}&token=${token}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status !== "ok" || !Array.isArray(data.data)) {
+      return new Response(
+        JSON.stringify({ error: data.data || "WAQI returned no data", stations: [] }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const stations: Station[] = data.data
+      .map((s: any) => {
+        const aqiNum = typeof s.aqi === "number" ? s.aqi : parseInt(s.aqi);
+        if (!Number.isFinite(aqiNum)) return null;
+        return {
+          uid: s.uid,
+          name: s.station?.name?.split(",")[0] || `Station ${s.uid}`,
+          station: s.station?.name || "",
+          lat: Number(s.lat),
+          lon: Number(s.lon),
+          aqi: aqiNum,
+        };
       })
+      .filter((s: Station | null): s is Station => s !== null);
+
+    return new Response(
+      JSON.stringify({ stations, count: stations.length, updated: new Date().toISOString() }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-
-    const stations = results
-      .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && r.value !== null)
-      .map((r) => r.value);
-
-    return new Response(JSON.stringify({ stations }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message, stations: [] }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
